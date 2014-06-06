@@ -15,9 +15,11 @@ var mixa = require('mixa_std_js_functions');
 var mstr = mixa.str;
 var mint = mixa.int;
 
-var file_log = "f:\\temp\\log_3proxy\\logs\\3proxy.log";
+//var file_log = "f:\\temp\\log_3proxy\\logs\\3proxy.log";
+var file_log = "/var/log/3proxy/3proxy.log";
+
 var interval_read_file = 5000;
-var interval_update_data = interval_read_file*10;
+var interval_update_data = interval_read_file*60*60;
 
 var fnc_get_data_from_line = require('./3proxy_cfg.js');
 
@@ -30,12 +32,8 @@ var data_s = {
 }
 
 
-
-
-
-
 console.log("\nstart");
-console.log("read file: "+file_log);
+console.log("watch file: "+file_log);
 
 
 setInterval(function(){

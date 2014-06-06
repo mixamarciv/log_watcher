@@ -63,11 +63,12 @@ function get_data_from_line(str){
     //var res = /^\d{10}\.\d{3} [(\d{2}\/\S{3}\/\d{4}\:\d{2}\:\d{2}\:\d{2} \+\d{4})] /.exec(str);
     var data = {};
     
+    str = str.substr(str.indexOf(' ['));
     
     {// date
         var d = new Date();
         var i = str.indexOf(']');
-        var t = str.substr(16,i-16);
+        var t = str.substr(0,i-1);
         {
           d.setDate(t.substr(0,2));
           t = t.substr(2+1);

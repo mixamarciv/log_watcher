@@ -13,6 +13,9 @@ CALL npm install
 ::@echo установка внешних клиентских js библиотек (через bower):
 ::CALL bower install
 
+cd node_modules
+git clone https://github.com/mixamarciv/mixa_std_js_functions.git
+
 @echo ==================================================
 @echo все
 @pause
