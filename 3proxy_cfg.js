@@ -63,12 +63,14 @@ function get_data_from_line(str){
     //var res = /^\d{10}\.\d{3} [(\d{2}\/\S{3}\/\d{4}\:\d{2}\:\d{2}\:\d{2} \+\d{4})] /.exec(str);
     var data = {};
     
-    str = str.substr(str.indexOf(' ['));
+    str = str.substr(str.indexOf(' [')+2);
     
     {// date
         var d = new Date();
         var i = str.indexOf(']');
-        var t = str.substr(0,i-1);
+        
+        var t = str.substr(0,i);
+
         {
           d.setDate(t.substr(0,2));
           t = t.substr(2+1);
@@ -109,15 +111,15 @@ function get_data_from_line(str){
     
     //t = t.replace('Jun','06');
     {//site
-        var res = /http\:\/\/(.*?)\//ig.exec(str);
+        var res = /(http\:\/\/|CONNECT_)(.*?)(\/|_HTTP\/)/ig.exec(str);
         var site = str;
         if (!res) {
-            console.log("ERROR");
+            console.log("ERROR get site name");
             console.log(util.inspect(data));
             console.log(str);
             return null;
         }
-        if (res[1]) site = res[1];
+        if (res[2]) site = res[2];
         else if (res[0]) site = res[0];
         //console.log(util.inspect(res));
         data.site = site;
