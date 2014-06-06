@@ -35,7 +35,8 @@ var data_s = {
 console.log("\nstart");
 console.log("watch file: "+file_log);
 
-
+data = {};
+data_s = {};
 setInterval(function(){
     data = {};
     data_s = {};
