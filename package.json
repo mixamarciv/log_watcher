@@ -1,0 +1,12 @@
+{
+  "name": "log_watcher",
+  "version": "0.0.1",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "underscore": ">=1.0",
+    "underscore.string": ">=2.0",
+    "iconv-lite": "*"
+  }
+}
