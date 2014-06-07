@@ -19,7 +19,7 @@ var file_log = "f:\\temp\\log_3proxy\\logs\\3proxy.log";
 //var file_log = "/var/log/3proxy/3proxy.log";
 
 var interval_read_file = 1000;
-var interval_watch_data = interval_read_file*60*60;
+//var interval_watch_data = interval_read_file*60*60;
 var max_sites_show = 5;
 
 var fnc_get_data_from_line = require('./3proxy_cfg.js');
@@ -35,6 +35,7 @@ var data_s = {
 }
 data = {};
 data_s = {};
+var arr_data = [];
 
 
 console.log("\nstart");
@@ -104,24 +105,26 @@ function update_data(line_data) {
 
 function update_host_data(l) {
     if (!data_s[l.host]) {
-        data_s[l.host] = {time:l.time,size_upload:l.size_upload,size_download:l.size_download};
+        data_s[l.host] = {first_time:l.time, time:l.time,size_upload:l.size_upload,size_download:l.size_download};
     }else{
-        if (data_s[l.host].time < l.time) data_s[l.host].time = l.time;
+        if (data_s[l.host].time       < l.time) data_s[l.host].time       = l.time;
+        if (data_s[l.host].first_time > l.time) data_s[l.host].first_time = l.time;
         data_s[l.host].size_upload   += l.size_upload;
         data_s[l.host].size_download += l.size_download;
     }
     
     if (!data[l.host]) {
         var s = {};
-        s[l.site] = {time:l.time, size_upload:l.size_upload, size_download:l.size_download};
+        s[l.site] = {first_time:l.time, time:l.time, size_upload:l.size_upload, size_download:l.size_download};
         data[l.host] = s;
     }else{
         var h = data[l.host];
         if (!h[l.site]) {
-            h[l.site] = {time:l.time, size_upload:l.size_upload, size_download:l.size_download};
+            h[l.site] = {first_time:l.time, time:l.time, size_upload:l.size_upload, size_download:l.size_download};
         }else{
-            if (h[l.site].time < l.time) h[l.site].time = l.time;
-            h[l.site].size_upload += l.size_upload;
+            if (h[l.site].time       < l.time) h[l.site].time       = l.time;
+            if (h[l.site].first_time > l.time) h[l.site].first_time = l.time;
+            h[l.site].size_upload   += l.size_upload;
             h[l.site].size_download += l.size_download;
         }
     }
@@ -148,25 +151,8 @@ function refresh_data(){
         var l = lines[i];
         update_host_data(l);
     }
-    show_data();
-}
-
-function sort_fnc(a,b){
-        if (a.size_download > b.size_download) return -1;
-        if (a.size_download < b.size_download) return  1;
-        return 0;
-}
-
-function show_data() {
-    /*
-    console.log("========================================================================");
-    console.log(util.inspect(data_s));
-    console.log("========================================================================");
-    console.log(util.inspect(data));
-    */
-    console.log("==["+mstr.date_to_str_format(last_time_data,'Y.M.D h:m:s')+"]===========================================================");
-    /******************/
     
+    //console.log("========================================================================");
     var arr = [];
     for(var host in data_s){
         var d = data_s[host];
@@ -185,15 +171,40 @@ function show_data() {
     }
     arr.sort(sort_fnc);
     //console.log("========================================================================");
-    console.log(util.inspect(arr));
+    //console.log(util.inspect(arr));
+    arr_data = arr;
     
+    
+    
+    show_data();
+}
+
+function sort_fnc(a,b){
+        if (a.size_download > b.size_download) return -1;
+        if (a.size_download < b.size_download) return  1;
+        return 0;
+}
+
+function show_data() {
+    /*
+    console.log("========================================================================");
+    console.log(util.inspect(data_s));
+    console.log("========================================================================");
+    console.log(util.inspect(data));
+    */
+    console.log("==["+mstr.date_to_str_format(last_time_data,'Y.M.D h:m:s')+"]===========================================================");
+    /******************/
+    var arr = arr_data;
+    
+    var to_time = last_time_data;
     for(var i=0;i<arr.length;i++){
         var h = arr[i];
         var host = h.host;
         console.log("["+host+"]\n"
                     +"  s u:"+mstr.set_fix_len(mint.round_size_bytes(h.size_upload),10,null,1)
                     +"  d:"+mstr.set_fix_len(mint.round_size_bytes(h.size_download),10,null,1)
-                    +"  t:"+mstr.date_to_str_format(h.time,'Y.M.D h:m:s')
+                    //+"  t:"+mstr.date_to_str_format(h.time,'Y.M.D h:m:s')
+                    +"  t:"+mstr.set_fix_len(mstr.time_duration_str(h.first_time,to_time),10,null,1)
                     );
         var hs = h.sites;
         
@@ -204,21 +215,25 @@ function show_data() {
             var site = s.site;
             console.log("    u:"+mstr.set_fix_len(mint.round_size_bytes(s.size_upload),10,null,1)+
                           "  d:"+mstr.set_fix_len(mint.round_size_bytes(s.size_download),10,null,1)+
-                          "  t:"+mstr.date_to_str_format(s.time,'Y.M.D h:m:s')+
+                          //"  t:"+mstr.date_to_str_format(s.time,'Y.M.D h:m:s')+
+                          "  t:"+mstr.set_fix_len(mstr.time_duration_str(s.first_time,to_time),10,null,1)+
                           "  "+site);
         }
         
-        var d_other = {time:0,size_upload:0,size_download:0};
-        for(var j=cnt;j<hs.length;j++){
-            var s = hs[j];
-            d_other.size_upload   += s.size_upload;
-            d_other.size_download += s.size_download;
-            if (d_other.time < s.time) d_other.time = s.time;
+        if (cnt > hs.length) {
+            var d_other = {time:0,size_upload:0,size_download:0};
+            for(var j=cnt;j<hs.length;j++){
+                var s = hs[j];
+                d_other.size_upload   += s.size_upload;
+                d_other.size_download += s.size_download;
+                if (d_other.time < s.time) d_other.time = s.time;
+            }
+            console.log("    u:"+mstr.set_fix_len(mint.round_size_bytes(d_other.size_upload),10,null,1)+
+                          "  d:"+mstr.set_fix_len(mint.round_size_bytes(d_other.size_download),10,null,1)+
+                          //"  t:"+mstr.date_to_str_format(d_other.time,'Y.M.D h:m:s')+
+                          "  t:"+mstr.set_fix_len(mstr.time_duration_str(d_other.first_time,to_time),10,null,1)+
+                          "  ...other...");
         }
-        console.log("    u:"+mstr.set_fix_len(mint.round_size_bytes(d_other.size_upload),10,null,1)+
-                      "  d:"+mstr.set_fix_len(mint.round_size_bytes(d_other.size_download),10,null,1)+
-                      "  t:"+mstr.date_to_str_format(d_other.time,'Y.M.D h:m:s')+
-                      "  ...other...");
         
     }
     
