@@ -19,7 +19,7 @@ var file_log = "f:\\temp\\log_3proxy\\logs\\3proxy.log";
 //var file_log = "/var/log/3proxy/3proxy.log";
 
 var interval_read_file = 1000;
-//var interval_watch_data = interval_read_file*60*60;
+var interval_watch_data = 1000*60*5;
 var max_sites_show = 5;
 
 var fnc_get_data_from_line = require('./3proxy_cfg.js');
@@ -192,7 +192,11 @@ function show_data() {
     console.log("========================================================================");
     console.log(util.inspect(data));
     */
-    console.log("==["+mstr.date_to_str_format(last_time_data,'Y.M.D h:m:s')+"]===========================================================");
+    console.log("==[ last record: "+mstr.date_to_str_format(last_time_data,'Y.M.D h:m:s')+" / update: "+mstr.date_to_str_format('Y.M.D h:m:s')+"]==========");
+    var mem = process.memoryUsage().heapTotal;
+    
+    console.log("mem usage: "+mint.round_size_bytes(mem)+"\n");
+    
     /******************/
     var arr = arr_data;
     
@@ -201,7 +205,7 @@ function show_data() {
         var h = arr[i];
         var host = h.host;
         console.log("["+host+"]\n"
-                    +"  s u:"+mstr.set_fix_len(mint.round_size_bytes(h.size_upload),10,null,1)
+                    +"sum u:"+mstr.set_fix_len(mint.round_size_bytes(h.size_upload),10,null,1)
                     +"  d:"+mstr.set_fix_len(mint.round_size_bytes(h.size_download),10,null,1)
                     //+"  t:"+mstr.date_to_str_format(h.time,'Y.M.D h:m:s')
                     +"  t:"+mstr.set_fix_len(mstr.time_duration_str(h.first_time,to_time),10,null,1)
