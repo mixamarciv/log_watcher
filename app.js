@@ -95,11 +95,18 @@ function get_data_from_line(str) {
 function update_data(line_data) {
     if (!line_data) return;
     
+    group_site_name(line_data);
+    
     lines.push(line_data);
     
     if (last_time_data < line_data.time) last_time_data = line_data.time;
 
     //data[line_data.host].push(line_data);
+}
+
+function group_site_name(line_data) {
+    var s = line_data.site;
+    if (/^cs\d*vk.me$/i.test(s)) line_data.site = "cs000000.vk.me";
 }
 
 
